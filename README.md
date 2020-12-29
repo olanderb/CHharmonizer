@@ -1,6 +1,6 @@
 # CHharmonizer
 
-1. Try to make a prototype that:
+First, make a prototype that:
 1. imports SPSS data/excel data
 2. standardizes key variables & values
 3. calculates tables of direct food security evidence (fcs, rcsi, hdds, etc)
