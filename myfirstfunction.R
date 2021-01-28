@@ -202,6 +202,12 @@ cf_table56 <- data %>% group_by(ADMIN1Name, ADMIN2Name) %>% drop_na(food_monthly
 replace(., is.na(.), 0)  %>% mutate_if(is.numeric, round, 1) %>% 
   ungroup()
 
+#mean example for stability - HH food expenditure over month
+cf_table57 <- data %>% group_by(ADMIN1Name, ADMIN2Name) %>% drop_na(food_monthly) %>%
+  summarise(`57_food_monthly_mean` = weighted.mean(food_monthly, hh_weight)) %>%
+  replace(., is.na(.), 0)  %>% mutate_if(is.numeric, round, 1) %>% 
+  ungroup()
+
 
 #7.  compile all the direct evidence and contributing factors and export the matrice intermediare excel sheet
 ### Merge key variables from Direct Evidence and Contributing factor tables together - problem is that some factors contributif have missing values
