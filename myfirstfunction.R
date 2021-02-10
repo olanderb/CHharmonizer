@@ -20,7 +20,7 @@ data <- data %>% mutate(HDDScore = HDDS12, #Household Dietary Diversity Score
                         LhHCSCat = Max_coping_behaviour) #livelihood coping strategies 
 #mutate to rename technical variables - allow ADM2 and weight variables to be blank
 data <- data %>% mutate(ADMIN1Name = state,
-                        ADMIN2Name = cod_lga,
+                        ADMIN2Name = cod_domain,
                         hh_weight = domainwgt)
 
 
@@ -172,12 +172,36 @@ cf_table01 <- data %>% group_by(ADMIN1Name, ADMIN2Name) %>%
 
 #another percentage example for hazards - 	Are there any conflicts between pastoralist and farmers in your community?
 cf_table02 <- data %>% group_by(ADMIN1Name, ADMIN2Name) %>%
-  drop_na(q8.15) %>%
-  count(q8.15, wt = hh_weight) %>%
+  drop_na(q8.15, wt = hh_weight) %>%
+  count(q8.15) %>%
   mutate(perc = 100 * n / sum(n)) %>%
   ungroup() %>% select(-n) %>%
   spread(key = q8.15, value = perc) %>% replace(., is.na(.), 0)  %>% mutate_if(is.numeric, round, 1) %>% 
   select(ADMIN1Name, ADMIN2Name, `02_q8.15_Yes` = Yes, `01_q8.15_No` = No)
+
+#same as table above put using pivot_wider instead of spread
+cf_table02_1 <- data %>% group_by(ADMIN1Name, ADMIN2Name) %>%
+  drop_na(q8.15) %>%
+  count(q8.15, wt = hh_weight) %>%
+  mutate(perc = 100 * n / sum(n)) %>%
+  ungroup() %>% select(-n) %>%
+  pivot_wider(names_from = q8.15,
+              values_from = perc,
+              values_fill = list(n = 0)) %>%
+  mutate_if(is.numeric, round, 1) %>% 
+  select(ADMIN1Name, ADMIN2Name, `02_q8.15_Yes` = Yes, `01_q8.15_No` = No)
+
+#another way - with survey design and questionnaire - gets the same results but not that helpful
+library(survey)
+library(questionr)
+
+svy <- svydesign(ids = ~1, weights = ~ hh_weight, data = data)
+
+cf_table02_2 <- svytable(~ADMIN2Name +q8.15 , design = svy)
+rprop(cf_table02_2)
+
+
+
 
 #another percentage example for availability - 	Did your household practice DRY SEASON/ IRRIGATION FARMING [2019/2020]?
 cf_table11 <- data %>% group_by(ADMIN1Name, ADMIN2Name) %>%
